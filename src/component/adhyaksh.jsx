@@ -29,8 +29,12 @@ import {
     CircularProgress,
     Snackbar,
     Alert,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from "@mui/material"
-import { Edit, Delete, Add, Person, Phone } from "@mui/icons-material"
+import { Edit, Delete, Add, Person, Phone, Wc } from "@mui/icons-material"
 import axios from "axios"
 
 function Adhyaksh() {
@@ -39,6 +43,7 @@ function Adhyaksh() {
     const [formData, setFormData] = useState({
         name: "",
         number: "",
+        gender: "",
     })
     const [data, setData] = useState([])
     const [loading, setLoading] = useState(false)
@@ -80,6 +85,7 @@ function Adhyaksh() {
         setFormData({
             name: "",
             number: "",
+            gender: "",
         })
         setDialogOpen(true)
     }
@@ -89,6 +95,7 @@ function Adhyaksh() {
         setFormData({
             name: itemToEdit.name,
             number: itemToEdit.number,
+            gender: itemToEdit.gender || "",
         })
         setEditingId(id)
         setDialogOpen(true)
@@ -334,6 +341,18 @@ function Adhyaksh() {
                                                     </Box>
                                                 </Box>
 
+                                                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                                                    <Wc sx={{ color: "text.secondary", fontSize: 20 }} />
+                                                    <Box>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.75rem" }}>
+                                                            Gender
+                                                        </Typography>
+                                                        <Typography variant="subtitle1" fontWeight="600">
+                                                            {row.gender || "N/A"}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+
                                                 <Divider />
 
                                                 <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -397,6 +416,16 @@ function Adhyaksh() {
                                                 Mobile Number
                                             </TableCell>
                                             <TableCell
+                                                sx={{
+                                                    color: "white",
+                                                    fontWeight: 700,
+                                                    fontSize: "1.1rem",
+                                                    textAlign: "center",
+                                                }}
+                                            >
+                                                Gender
+                                            </TableCell>
+                                            <TableCell
                                                 align="right"
                                                 sx={{
                                                     color: "white",
@@ -440,6 +469,17 @@ function Adhyaksh() {
                                                         }}
                                                     >
                                                         {row.number}
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Typography
+                                                        fontWeight="500"
+                                                        sx={{
+                                                            textAlign: "center",
+                                                            fontSize: "1rem",
+                                                        }}
+                                                    >
+                                                        {row.gender || "N/A"}
                                                     </Typography>
                                                 </TableCell>
                                                 <TableCell
@@ -547,6 +587,22 @@ function Adhyaksh() {
                                 helperText={`${formData.number.length}/10 digits`}
                                 error={formData.number.length > 0 && formData.number.length !== 10}
                             />
+                            <FormControl fullWidth>
+                                <InputLabel>Gender</InputLabel>
+                                <Select
+                                    name="gender"
+                                    value={formData.gender}
+                                    label="Gender"
+                                    onChange={handleChange}
+                                    startAdornment={<Wc sx={{ color: "text.secondary", mr: 1 }} />}
+                                    sx={{
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <MenuItem value="Male">Male</MenuItem>
+                                    <MenuItem value="Female">Female</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Stack>
                     </DialogContent>
                     <DialogActions sx={{ p: 3, gap: 1 }}>
@@ -563,7 +619,7 @@ function Adhyaksh() {
                         <Button
                             variant="contained"
                             onClick={handleSubmit}
-                            disabled={loading || !formData.name || !formData.number || formData.number.length !== 10}
+                            disabled={loading || !formData.name || !formData.number || formData.number.length !== 10 || !formData.gender}
                             sx={{
                                 borderRadius: 2,
                                 px: 3,

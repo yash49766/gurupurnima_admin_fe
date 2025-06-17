@@ -33,6 +33,7 @@ import {
     FormControl,
     InputLabel,
     Select,
+    Chip,
 } from "@mui/material"
 import {Edit, Delete, Add, Person, Phone, Group, Sort, Palette} from "@mui/icons-material"
 import axios from "axios"
@@ -90,6 +91,18 @@ function Samiti() {
         { label: "Peta", value: "purple", hex: "#9f2886" }
     ]
 
+    // Helper function to get color info from hex
+    const getColorInfoFromHex = (hexColor) => {
+        const colorOption = colorOptions.find(option => option.hex === hexColor)
+        return colorOption || { label: "Unknown", value: "unknown", hex: hexColor }
+    }
+
+    // Helper function to get color info from value
+    const getColorInfoFromValue = (colorValue) => {
+        const colorOption = colorOptions.find(option => option.value === colorValue)
+        return colorOption || { label: "Unknown", value: colorValue, hex: "#000000" }
+    }
+
     // Fetch data from API
     useEffect(() => {
         fetchData()
@@ -142,11 +155,25 @@ function Samiti() {
 
     const handleEdit = (id) => {
         const itemToEdit = data.find((item) => item._id === id)
+
+        // Determine the color value to set in the form
+        let colorValue = ""
+        if (itemToEdit.color) {
+            // Check if the color is a hex value (stored format)
+            if (itemToEdit.color.startsWith("#")) {
+                const colorInfo = getColorInfoFromHex(itemToEdit.color)
+                colorValue = colorInfo.value
+            } else {
+                // If it's already a value (blue, purple, etc.)
+                colorValue = itemToEdit.color
+            }
+        }
+
         setFormData({
             samiti: itemToEdit.samiti,
             name: itemToEdit.name,
             number: itemToEdit.number,
-            color: itemToEdit.color || "",
+            color: colorValue,
         })
         setEditingId(id)
         setDialogOpen(true)
@@ -390,96 +417,121 @@ function Samiti() {
 
                                 {isMobile ? (
                                     <Box sx={{p: 2}}>
-                                        {sortedData.map((row, index) => (
-                                            <Fade in timeout={300 + index * 100} key={row._id}>
-                                                <Card
-                                                    sx={{
-                                                        mb: 2,
-                                                        borderRadius: 3,
-                                                        border: "1px solid",
-                                                        borderColor: alpha(theme.palette.primary.main, 0.1),
-                                                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                                                        "&:hover": {
-                                                            transform: "translateY(-4px)",
-                                                            boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
-                                                            borderColor: theme.palette.primary.main,
-                                                        },
-                                                    }}
-                                                >
-                                                    <CardContent sx={{p: 3}}>
-                                                        <Stack spacing={2.5}>
-                                                            <Box>
-                                                                <Typography
-                                                                    variant="h6"
-                                                                    fontWeight="600"
-                                                                    color="primary.main"
-                                                                    sx={{mb: 1}}
-                                                                >
-                                                                    {row.samiti}
-                                                                </Typography>
-                                                            </Box>
-
-                                                            <Divider/>
-
-                                                            <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
-                                                                <Person sx={{color: "text.secondary", fontSize: 20}}/>
+                                        {sortedData.map((row, index) => {
+                                            const colorInfo = row.color ? getColorInfoFromHex(row.color) : null;
+                                            return (
+                                                <Fade in timeout={300 + index * 100} key={row._id}>
+                                                    <Card
+                                                        sx={{
+                                                            mb: 2,
+                                                            borderRadius: 3,
+                                                            border: "1px solid",
+                                                            borderColor: alpha(theme.palette.primary.main, 0.1),
+                                                            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                                            "&:hover": {
+                                                                transform: "translateY(-4px)",
+                                                                boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+                                                                borderColor: theme.palette.primary.main,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <CardContent sx={{p: 3}}>
+                                                            <Stack spacing={2.5}>
                                                                 <Box>
-                                                                    <Typography variant="body2" color="text.secondary"
-                                                                                sx={{fontSize: "0.75rem"}}>
-                                                                        Contact Person
-                                                                    </Typography>
-                                                                    <Typography variant="subtitle1" fontWeight="600">
-                                                                        {row.name}
+                                                                    <Typography
+                                                                        variant="h6"
+                                                                        fontWeight="600"
+                                                                        color="primary.main"
+                                                                        sx={{mb: 1}}
+                                                                    >
+                                                                        {row.samiti}
                                                                     </Typography>
                                                                 </Box>
-                                                            </Box>
 
-                                                            <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
-                                                                <Phone sx={{color: "text.secondary", fontSize: 20}}/>
-                                                                <Box>
-                                                                    <Typography variant="body2" color="text.secondary"
-                                                                                sx={{fontSize: "0.75rem"}}>
-                                                                        Mobile Number
-                                                                    </Typography>
-                                                                    <Typography variant="subtitle1" fontWeight="600">
-                                                                        {row.number}
-                                                                    </Typography>
+                                                                <Divider/>
+
+                                                                <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
+                                                                    <Person sx={{color: "text.secondary", fontSize: 20}}/>
+                                                                    <Box>
+                                                                        <Typography variant="body2" color="text.secondary"
+                                                                                    sx={{fontSize: "0.75rem"}}>
+                                                                            Contact Person
+                                                                        </Typography>
+                                                                        <Typography variant="subtitle1" fontWeight="600">
+                                                                            {row.name}
+                                                                        </Typography>
+                                                                    </Box>
                                                                 </Box>
-                                                            </Box>
 
-                                                            <Divider/>
+                                                                <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
+                                                                    <Phone sx={{color: "text.secondary", fontSize: 20}}/>
+                                                                    <Box>
+                                                                        <Typography variant="body2" color="text.secondary"
+                                                                                    sx={{fontSize: "0.75rem"}}>
+                                                                            Mobile Number
+                                                                        </Typography>
+                                                                        <Typography variant="subtitle1" fontWeight="600">
+                                                                            {row.number}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                </Box>
 
-                                                            <Stack direction="row" spacing={1} justifyContent="flex-end">
-                                                                <IconButton
-                                                                    onClick={() => handleEdit(row._id)}
-                                                                    sx={{
-                                                                        color: "primary.main",
-                                                                        backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                                                                        "&:hover": {
-                                                                            backgroundColor: alpha(theme.palette.primary.main, 0.16),
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <Edit/>
-                                                                </IconButton>
-                                                                <IconButton
-                                                                    onClick={() => handleDelete(row._id)}
-                                                                    sx={{
-                                                                        color: "error.main",
-                                                                        backgroundColor: alpha(theme.palette.error.main, 0.08),
-                                                                        "&:hover": {
-                                                                            backgroundColor: alpha(theme.palette.error.main, 0.16),
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <Delete/>
-                                                                </IconButton>
+                                                                {colorInfo && (
+                                                                    <Box sx={{display: "flex", alignItems: "center", gap: 1.5}}>
+                                                                        <Palette sx={{color: "text.secondary", fontSize: 20}}/>
+                                                                        <Box>
+                                                                            <Typography variant="body2" color="text.secondary"
+                                                                                        sx={{fontSize: "0.75rem"}}>
+                                                                                Color
+                                                                            </Typography>
+                                                                            <Chip
+                                                                                label={colorInfo.label}
+                                                                                sx={{
+                                                                                    backgroundColor: colorInfo.hex,
+                                                                                    color: "white",
+                                                                                    fontWeight: "600",
+                                                                                    mt: 0.5
+                                                                                }}
+                                                                                size="small"
+                                                                            />
+                                                                        </Box>
+                                                                    </Box>
+                                                                )}
+
+                                                                <Divider/>
+
+                                                                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                                                    <IconButton
+                                                                        onClick={() => handleEdit(row._id)}
+                                                                        sx={{
+                                                                            color: "primary.main",
+                                                                            backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                                                                            "&:hover": {
+                                                                                backgroundColor: alpha(theme.palette.primary.main, 0.16),
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <Edit/>
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        onClick={() => handleDelete(row._id)}
+                                                                        sx={{
+                                                                            color: "error.main",
+                                                                            backgroundColor: alpha(theme.palette.error.main, 0.08),
+                                                                            "&:hover": {
+                                                                                backgroundColor: alpha(theme.palette.error.main, 0.16),
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <Delete/>
+                                                                    </IconButton>
+                                                                </Stack>
                                                             </Stack>
-                                                        </Stack>
-                                                    </CardContent>
-                                                </Card>
-                                            </Fade>
-                                        ))}
+                                                        </CardContent>
+                                                    </Card>
+                                                </Fade>
+                                            );
+                                        })}
                                     </Box>
                                 ) : (
                                     <TableContainer>
@@ -516,6 +568,14 @@ function Samiti() {
                                                     }}>
                                                         Mobile Number
                                                     </TableCell>
+                                                    <TableCell sx={{
+                                                        color: "white",
+                                                        fontWeight: 700,
+                                                        fontSize: "1.5rem",
+                                                        textAlign: "center"
+                                                    }}>
+                                                        Color
+                                                    </TableCell>
                                                     <TableCell align="right" sx={{
                                                         color: "white",
                                                         fontWeight: 700,
@@ -527,72 +587,93 @@ function Samiti() {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {sortedData.map((row, index) => (
-                                                    <Fade in timeout={200 + index * 50} key={row._id}>
-                                                        <TableRow
-                                                            sx={{
-                                                                "&:hover": {
-                                                                    backgroundColor: alpha(theme.palette.primary.main, 0.04),
-                                                                },
-                                                            }}
-                                                        >
-                                                            <TableCell>
-                                                                <Typography fontWeight="600" color="primary.main" sx={{
-                                                                    textAlign: "center",
-                                                                }}>
-                                                                    {row.samiti}
-                                                                </Typography>
-                                                            </TableCell>
+                                                {sortedData.map((row, index) => {
+                                                    const colorInfo = row.color ? getColorInfoFromHex(row.color) : null;
+                                                    return (
+                                                        <Fade in timeout={200 + index * 50} key={row._id}>
+                                                            <TableRow
+                                                                sx={{
+                                                                    "&:hover": {
+                                                                        backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                                                                    },
+                                                                }}
+                                                            >
+                                                                <TableCell>
+                                                                    <Typography fontWeight="600" color="primary.main" sx={{
+                                                                        textAlign: "center",
+                                                                    }}>
+                                                                        {row.samiti}
+                                                                    </Typography>
+                                                                </TableCell>
 
-                                                            <TableCell>
-                                                                <Typography fontWeight="600" sx={{
-                                                                    textAlign: "center",
-                                                                }}>
-                                                                    {row.name}
-                                                                </Typography>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Typography fontWeight="500" sx={{
-                                                                    textAlign: "center",
-                                                                }}>
-                                                                    {row.number}
-                                                                </Typography>
-                                                            </TableCell>
+                                                                <TableCell>
+                                                                    <Typography fontWeight="600" sx={{
+                                                                        textAlign: "center",
+                                                                    }}>
+                                                                        {row.name}
+                                                                    </Typography>
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Typography fontWeight="500" sx={{
+                                                                        textAlign: "center",
+                                                                    }}>
+                                                                        {row.number}
+                                                                    </Typography>
+                                                                </TableCell>
 
-                                                            <TableCell align="right" sx={{
-                                                                textAlign: "center",
-                                                            }}>
-                                                                <Stack direction="row" spacing={1}
-                                                                       justifyContent="flex-end">
-                                                                    <IconButton
-                                                                        onClick={() => handleEdit(row._id)}
-                                                                        sx={{
-                                                                            color: "primary.main",
-                                                                            backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                                                                            "&:hover": {
-                                                                                backgroundColor: alpha(theme.palette.primary.main, 0.16),
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        <Edit/>
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        onClick={() => handleDelete(row._id)}
-                                                                        sx={{
-                                                                            color: "error.main",
-                                                                            backgroundColor: alpha(theme.palette.error.main, 0.08),
-                                                                            "&:hover": {
-                                                                                backgroundColor: alpha(theme.palette.error.main, 0.16),
-                                                                            },
-                                                                        }}
-                                                                    >
-                                                                        <Delete/>
-                                                                    </IconButton>
-                                                                </Stack>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Fade>
-                                                ))}
+                                                                <TableCell sx={{ textAlign: "center" }}>
+                                                                    {colorInfo ? (
+                                                                        <Chip
+                                                                            label={colorInfo.label}
+                                                                            sx={{
+                                                                                backgroundColor: colorInfo.hex,
+                                                                                color: "white",
+                                                                                fontWeight: "600"
+                                                                            }}
+                                                                            size="small"
+                                                                        />
+                                                                    ) : (
+                                                                        <Typography variant="body2" color="text.secondary">
+                                                                            N/A
+                                                                        </Typography>
+                                                                    )}
+                                                                </TableCell>
+
+                                                                <TableCell align="right" sx={{
+                                                                    textAlign: "center",
+                                                                }}>
+                                                                    <Stack direction="row" spacing={1}
+                                                                           justifyContent="flex-end">
+                                                                        <IconButton
+                                                                            onClick={() => handleEdit(row._id)}
+                                                                            sx={{
+                                                                                color: "primary.main",
+                                                                                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                                                                                "&:hover": {
+                                                                                    backgroundColor: alpha(theme.palette.primary.main, 0.16),
+                                                                                },
+                                                                            }}
+                                                                        >
+                                                                            <Edit/>
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            onClick={() => handleDelete(row._id)}
+                                                                            sx={{
+                                                                                color: "error.main",
+                                                                                backgroundColor: alpha(theme.palette.error.main, 0.08),
+                                                                                "&:hover": {
+                                                                                    backgroundColor: alpha(theme.palette.error.main, 0.16),
+                                                                                },
+                                                                            }}
+                                                                        >
+                                                                            <Delete/>
+                                                                        </IconButton>
+                                                                    </Stack>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        </Fade>
+                                                    );
+                                                })}
                                             </TableBody>
                                         </Table>
                                     </TableContainer>
